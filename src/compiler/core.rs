@@ -75,8 +75,13 @@ impl<'source> Compiler<'source> {
     }
 
     pub fn binary(&mut self) {
-        use OpCode::{OpAdd, OpDivide, OpMultiply, OpSubtract};
-        use TokenType::{Minus, Plus, Slash, Star};
+        use OpCode::{
+            OpAdd, OpDivide, OpEqual, OpGreater, OpGreaterEqual, OpLess, OpLessEqual, OpMultiply,
+            OpNotEqual, OpSubtract,
+        };
+        use TokenType::{
+            BangEqual, EqualEqual, Greater, GreaterEqual, Less, LessEqual, Minus, Plus, Slash, Star,
+        };
 
         if let Some(token) = self.previous_token.clone() {
             let rule = get_rule(token.token_type);
@@ -88,6 +93,12 @@ impl<'source> Compiler<'source> {
                 Minus => self.program.push((OpSubtract, token.line)),
                 Star => self.program.push((OpMultiply, token.line)),
                 Slash => self.program.push((OpDivide, token.line)),
+                BangEqual => self.program.push((OpNotEqual, token.line)),
+                EqualEqual => self.program.push((OpEqual, token.line)),
+                Greater => self.program.push((OpGreater, token.line)),
+                GreaterEqual => self.program.push((OpGreaterEqual, token.line)),
+                Less => self.program.push((OpLess, token.line)),
+                LessEqual => self.program.push((OpLessEqual, token.line)),
                 _ => {}
             }
         }

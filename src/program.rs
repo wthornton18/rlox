@@ -14,6 +14,13 @@ pub enum OpCode {
     OpTrue,
     OpFalse,
     OpNot,
+
+    OpEqual,
+    OpGreater,
+    OpGreaterEqual,
+    OpLess,
+    OpLessEqual,
+    OpNotEqual,
 }
 
 pub type Instruction = (OpCode, usize);

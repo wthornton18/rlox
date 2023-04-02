@@ -79,6 +79,36 @@ impl VM {
                 let a = self.stack.pop()?;
                 self.stack.push(!a)?;
             }
+            OpGreater => {
+                let b = self.stack.pop()?;
+                let a = self.stack.pop()?;
+                self.stack.push(Value::Boolean(a > b))?
+            }
+            OpGreaterEqual => {
+                let b = self.stack.pop()?;
+                let a = self.stack.pop()?;
+                self.stack.push(Value::Boolean(a >= b))?
+            }
+            OpLess => {
+                let b = self.stack.pop()?;
+                let a = self.stack.pop()?;
+                self.stack.push(Value::Boolean(a < b))?
+            }
+            OpLessEqual => {
+                let b = self.stack.pop()?;
+                let a = self.stack.pop()?;
+                self.stack.push(Value::Boolean(a <= b))?
+            }
+            OpEqual => {
+                let b = self.stack.pop()?;
+                let a = self.stack.pop()?;
+                self.stack.push(Value::Boolean(a == b))?
+            }
+            OpNotEqual => {
+                let b = self.stack.pop()?;
+                let a = self.stack.pop()?;
+                self.stack.push(Value::Boolean(a != b))?
+            }
         };
 
         #[cfg(feature = "tracing")]
