@@ -1,14 +1,13 @@
 use super::core::*;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Not, Sub};
 
 pub enum OpErr {
-    BooleanErr,
-    FloatBooleanErr,
-    BooleanFloatErr,
+    Internal,
 }
 
 pub struct AdditionErr(pub OpErr);
 pub struct SubtractionErr(pub OpErr);
+pub struct NegErr(pub OpErr);
 
 pub struct DivisionErr {
     pub op_err: Option<OpErr>,
@@ -51,6 +50,12 @@ impl From<OpErr> for MultiplyErr {
     }
 }
 
+impl From<OpErr> for NegErr {
+    fn from(value: OpErr) -> Self {
+        Self(value)
+    }
+}
+
 impl Add<Value> for Value {
     type Output = Result<Self, AdditionErr>;
     fn add(self, rhs: Value) -> Self::Output {
@@ -58,13 +63,10 @@ impl Add<Value> for Value {
         use Value::*;
         match (self, rhs) {
             (Float(s), Float(v)) => Ok(Float(s + v)),
-            (Float(_), Boolean(_)) => Err(FloatBooleanErr)?,
-            (Boolean(_), Float(_)) => Err(BooleanFloatErr)?,
-            (Boolean(_), Boolean(_)) => Err(BooleanErr)?,
+            _ => Err(Internal)?,
         }
     }
 }
-
 impl Sub<Value> for Value {
     type Output = Result<Self, SubtractionErr>;
     fn sub(self, rhs: Value) -> Self::Output {
@@ -72,9 +74,7 @@ impl Sub<Value> for Value {
         use Value::*;
         match (self, rhs) {
             (Float(s), Float(v)) => Ok(Float(s - v)),
-            (Float(_), Boolean(_)) => Err(FloatBooleanErr)?,
-            (Boolean(_), Float(_)) => Err(BooleanFloatErr)?,
-            (Boolean(_), Boolean(_)) => Err(BooleanErr)?,
+            _ => Err(Internal)?,
         }
     }
 }
@@ -93,9 +93,7 @@ impl Div<Value> for Value {
                     Ok(Float(s / v))
                 }
             }
-            (Float(_), Boolean(_)) => Err(FloatBooleanErr)?,
-            (Boolean(_), Float(_)) => Err(BooleanFloatErr)?,
-            (Boolean(_), Boolean(_)) => Err(BooleanErr)?,
+            _ => Err(Internal)?,
         }
     }
 }
@@ -107,21 +105,39 @@ impl Mul<Value> for Value {
         use Value::*;
         match (self, rhs) {
             (Float(s), Float(v)) => Ok(Float(s * v)),
-            (Float(_), Boolean(_)) => Err(FloatBooleanErr)?,
-            (Boolean(_), Float(_)) => Err(BooleanFloatErr)?,
-            (Boolean(_), Boolean(_)) => Err(BooleanErr)?,
+            _ => Err(Internal)?,
         }
     }
 }
 
 impl Neg for Value {
-    type Output = Value;
+    type Output = Result<Self, NegErr>;
     fn neg(self) -> Self::Output {
-        use Value::*;
+        use OpErr::Internal;
+        use Value::Float;
 
         match self {
-            Float(f) => Float(-f),
+            Float(f) => Ok(Float(-f)),
+            _ => Err(Internal)?,
+        }
+    }
+}
+
+impl Not for Value {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        use Value::*;
+        match self {
             Boolean(b) => Boolean(!b),
+            Nil => Boolean(true),
+            Float(f) => {
+                if f == 0.0 {
+                    Boolean(true)
+                } else {
+                    Boolean(false)
+                }
+            }
         }
     }
 }

@@ -2,4 +2,5 @@
 pub enum Value {
     Float(f64),
     Boolean(bool),
+    Nil,
 }

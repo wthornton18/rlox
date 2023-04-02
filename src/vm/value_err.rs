@@ -1,4 +1,4 @@
-use crate::value::ops::{AdditionErr, DivisionErr, MultiplyErr, SubtractionErr};
+use crate::value::ops::{AdditionErr, DivisionErr, MultiplyErr, NegErr, SubtractionErr};
 
 use super::{InterpretError, InterpretErrorType};
 
@@ -42,6 +42,18 @@ impl From<MultiplyErr> for InterpretError {
         match value.0 {
             _ => Self {
                 msg: "Multiply err".to_string(),
+                error: Runtime,
+            },
+        }
+    }
+}
+
+impl From<NegErr> for InterpretError {
+    fn from(value: NegErr) -> Self {
+        use InterpretErrorType::*;
+        match value.0 {
+            _ => Self {
+                msg: "Negation err".to_string(),
                 error: Runtime,
             },
         }

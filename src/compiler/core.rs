@@ -42,6 +42,7 @@ impl<'source> Compiler<'source> {
         self.advance();
         self.expression();
         self.advance_end();
+        self.program.push((OpCode::OpReturn, 0));
     }
 
     pub fn grouping(&mut self) {
@@ -50,9 +51,9 @@ impl<'source> Compiler<'source> {
     }
 
     pub fn unary(&mut self) {
-        use OpCode::OpNegate;
+        use OpCode::{OpNegate, OpNot};
         use Precedence::Unary;
-        use TokenType::Minus;
+        use TokenType::{Bang, Minus};
 
         let previous_token = self.previous_token.clone();
 
@@ -64,6 +65,11 @@ impl<'source> Compiler<'source> {
                 line,
                 ..
             }) => self.program.push((OpNegate, line)),
+            Some(Token {
+                token_type: Bang,
+                line,
+                ..
+            }) => self.program.push((OpNot, line)),
             _ => {}
         }
     }
@@ -85,11 +91,6 @@ impl<'source> Compiler<'source> {
                 _ => {}
             }
         }
-    }
-
-    pub fn semicolon(&mut self) {
-        self.advance();
-        self.panic_mode = false;
     }
 
     pub fn number(&mut self) {
@@ -115,6 +116,20 @@ impl<'source> Compiler<'source> {
                 self.program.push((OpConstant(idx), line))
             }
             None => {}
+        }
+    }
+
+    pub fn literal(&mut self) {
+        use OpCode::{OpFalse, OpNil, OpTrue};
+        use TokenType::{FalseIdent, Nil, TrueIdent};
+
+        if let Some(token) = self.previous_token.clone() {
+            match token.token_type {
+                FalseIdent => self.program.push((OpFalse, token.line)),
+                TrueIdent => self.program.push((OpTrue, token.line)),
+                Nil => self.program.push((OpNil, token.line)),
+                _ => {}
+            }
         }
     }
 }
@@ -181,6 +196,12 @@ impl<'source> Compiler<'source> {
                     break;
                 }
             }
+        }
+        #[cfg(feature = "tracing")]
+        {
+            println!("\t==compiler==");
+            println!("\t\tcurrent token: {ct:?}", ct = self.current_token);
+            println!("\t\tprevious token: {pt:?}", pt = self.previous_token);
         }
     }
 

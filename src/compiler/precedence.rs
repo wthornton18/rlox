@@ -84,6 +84,10 @@ pub fn get_rule<'source>(token_type: TokenType) -> Rule<'source> {
 
         NumericLiteral => Rule::new(Some(Compiler::number), None, PrecNone),
 
+        Nil | TrueIdent | FalseIdent => Rule::new(Some(Compiler::literal), None, PrecNone),
+
+        Bang => Rule::new(Some(Compiler::unary), None, PrecNone),
+
         _ => Rule::new(None, None, PrecNone),
     }
 }

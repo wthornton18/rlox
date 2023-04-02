@@ -1,9 +1,6 @@
-#[cfg(feature = "tracing")]
 use crate::constants::Constants;
-#[cfg(feature = "tracing")]
 use crate::program::OpCode;
 
-#[cfg(feature = "tracing")]
 pub fn disassemble_instruction(
     op: &(OpCode, usize),
     constants: &Constants,
@@ -11,16 +8,21 @@ pub fn disassemble_instruction(
     prefix: &str,
 ) {
     use OpCode::*;
-    match op.0 {
-        OpReturn => println!("{prefix}{ip}  OP_RETURN"),
-        OpConstant(idx) => println!(
+    let s = match op.0 {
+        OpReturn => format!("OP_RETURN"),
+        OpConstant(idx) => format!(
             "{prefix}{ip} OP_CONSTANT: {idx} => {constant:?}",
             constant = constants[idx.clone()]
         ),
-        OpNegate => println!("{prefix}{ip} OP_NEGATE"),
-        OpAdd => println!("{prefix}{ip} OP_ADD"),
-        OpMultiply => println!("{prefix}{ip} OP_MULTIPLY"),
-        OpDivide => println!("{prefix}{ip} OP_DIVIDE"),
-        OpSubtract => println!("{prefix}{ip} OP_SUBTRACT"),
-    }
+        OpNegate => format!("OP_NEGATE"),
+        OpAdd => format!("OP_ADD"),
+        OpMultiply => format!("OP_MULTIPLY"),
+        OpDivide => format!("OP_DIVIDE"),
+        OpSubtract => format!("OP_SUBTRACT"),
+        OpNil => format!("OP_NIL"),
+        OpFalse => format!("OP_FALSE"),
+        OpTrue => format!("OP_TRUE"),
+        OpNot => format!("OP_NOT"),
+    };
+    println!("{prefix}{ip} {s} {line}", line = op.1);
 }

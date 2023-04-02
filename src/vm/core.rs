@@ -3,6 +3,7 @@ use crate::constants::*;
 use crate::disassemble::*;
 use crate::program::*;
 use crate::stack::*;
+use crate::value::*;
 
 #[derive(Default)]
 pub struct VM {
@@ -17,6 +18,7 @@ pub enum InterpretErrorType {
     Runtime,
     Compiler,
 }
+#[derive(Debug, Clone)]
 
 pub struct InterpretError {
     pub msg: String,
@@ -48,7 +50,7 @@ impl VM {
             }
             OpNegate => {
                 let val = self.stack.pop()?;
-                self.stack.push(-val)?;
+                self.stack.push((-val)?)?;
             }
             OpAdd => {
                 let b = self.stack.pop()?;
@@ -69,6 +71,13 @@ impl VM {
                 let b = self.stack.pop()?;
                 let a = self.stack.pop()?;
                 self.stack.push((a * b)?)?;
+            }
+            OpNil => self.stack.push(Value::Nil)?,
+            OpFalse => self.stack.push(Value::Boolean(false))?,
+            OpTrue => self.stack.push(Value::Boolean(true))?,
+            OpNot => {
+                let a = self.stack.pop()?;
+                self.stack.push(!a)?;
             }
         };
 
@@ -94,7 +103,11 @@ impl Iterator for VM {
         }
         match self.step() {
             Ok(()) => Some(()),
-            Err(_) => None,
+            Err(err) => {
+                #[cfg(feature = "tracing")]
+                println!("{:?}", err);
+                None
+            }
         }
     }
 }

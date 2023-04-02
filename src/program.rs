@@ -10,6 +10,10 @@ pub enum OpCode {
     OpDivide,
 
     OpConstant(usize),
+    OpNil,
+    OpTrue,
+    OpFalse,
+    OpNot,
 }
 
 pub type Instruction = (OpCode, usize);
