@@ -2,14 +2,14 @@ const STACK_SIZE: usize = 255;
 use crate::value::*;
 
 pub struct Stack {
-    arr: [Value; STACK_SIZE],
+    arr: Vec<Value>,
     sp: usize,
 }
 
 impl Default for Stack {
     fn default() -> Self {
         Self {
-            arr: [Value::Float(0.0); STACK_SIZE],
+            arr: Vec::with_capacity(STACK_SIZE),
             sp: 0,
         }
     }
@@ -47,7 +47,7 @@ impl Stack {
             Err(StackError::StackUnderflow)
         } else {
             self.sp -= 1;
-            Ok(self.arr[self.sp])
+            Ok(self.arr[self.sp].clone())
         }
     }
 }

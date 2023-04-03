@@ -19,6 +19,7 @@ pub struct Compiler<'a> {
     current_token: Option<Token>,
     previous_token: Option<Token>,
     pub constants: Constants,
+    pub strings: Vec<String>,
     pub program: Program,
     pub errors: CompilerErrors,
 }
@@ -34,6 +35,7 @@ impl<'source> Compiler<'source> {
             previous_token: None,
             program: vec![],
             errors: vec![],
+            strings: Vec::new(),
             constants: Constants::new(),
         }
     }
@@ -141,6 +143,28 @@ impl<'source> Compiler<'source> {
                 Nil => self.program.push((OpNil, token.line)),
                 _ => {}
             }
+        }
+    }
+
+    pub fn string(&mut self) {
+        use OpCode::OpConstant;
+
+        match self.previous_token {
+            Some(Token {
+                pos, length, line, ..
+            }) => {
+                let string = self.source[(pos + 1)..(pos + length - 2)]
+                    .iter()
+                    .collect::<String>();
+                self.strings.push(string);
+
+                let idx = self
+                    .constants
+                    .push(Value::new_string(self.strings.len() - 2));
+
+                self.program.push((OpConstant(idx), line))
+            }
+            None => {}
         }
     }
 }

@@ -1,4 +1,5 @@
 use super::core::*;
+use std::cmp::{Ordering, PartialEq, PartialOrd};
 use std::ops::{Add, Div, Mul, Neg, Not, Sub};
 
 pub enum OpErr {
@@ -138,6 +139,27 @@ impl Not for Value {
                     Boolean(false)
                 }
             }
+            _ => Boolean(false),
+        }
+    }
+}
+
+impl PartialEq for Value {
+    fn eq(&self, rhs: &Value) -> bool {
+        use Value::*;
+
+        matches!((self, rhs), (Float(f), Float(h)) if h ==f )
+            || matches!((self, rhs), (Boolean(a), Boolean(b)) if a ==b)
+            || matches!((self, rhs), (Nil, Nil))
+    }
+}
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        use Value::*;
+        match (self, other) {
+            (Float(a), Float(b)) => a.partial_cmp(b),
+            _ => None,
         }
     }
 }

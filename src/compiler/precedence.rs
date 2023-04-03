@@ -90,6 +90,8 @@ pub fn get_rule<'source>(token_type: TokenType) -> Rule<'source> {
 
         BangEqual | EqualEqual => Rule::new(None, Some(Compiler::binary), Equality),
 
+        StringLiteral => Rule::new(Some(Compiler::string), None, PrecNone),
+
         Greater | GreaterEqual | LessEqual | Less => {
             Rule::new(None, Some(Compiler::binary), Comparison)
         }
